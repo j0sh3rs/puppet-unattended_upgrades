@@ -28,6 +28,7 @@ class unattended_upgrades (
   Optional[Boolean]                         $only_on_ac_power       = undef,
   Optional[Boolean]                         $whitelist_strict       = undef,
   Optional[Boolean]                         $allow_downgrade        = undef,
+  Optional[Boolean]                         $allow_phased_packages  = undef,
 ) inherits unattended_upgrades::params {
   # apt::conf settings require the apt class to work
   include apt
@@ -54,6 +55,13 @@ class unattended_upgrades (
   apt::conf { 'unattended-upgrades':
     priority      => 50,
     content       => template("${module_name}/unattended-upgrades.erb"),
+    require       => Package['unattended-upgrades'],
+    notify_update => $notify_update,
+  }
+
+  apt::conf { 'phased-updates':
+    priority      => 99,
+    content       => template("${module_name}/phased.erb"),
     require       => Package['unattended-upgrades'],
     notify_update => $notify_update,
   }

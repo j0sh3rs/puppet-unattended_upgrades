@@ -5,6 +5,7 @@ require 'spec_helper'
 describe 'unattended_upgrades' do
   let(:file_unattended) { '/etc/apt/apt.conf.d/50unattended-upgrades' }
   let(:file_periodic) { '/etc/apt/apt.conf.d/10periodic' }
+  let(:file_phased) { '/etc/apt/apt.conf.d/99phased-updates' }
 
   shared_examples 'basic specs' do
     let(:params) { {} }
@@ -35,6 +36,17 @@ describe 'unattended_upgrades' do
       end
 
       it { is_expected.to create_file(file_unattended).without_content(%r{Unattended-Upgrade::Sender}) }
+
+      it do
+        is_expected.to create_file(file_phased).with(
+          owner: 'root',
+          group: 'root',
+        ).without_content(
+          %r{Update-Manager::Always-Include-Phased-Updates;}
+        ).without_content(
+          %r{APT::Get::Always-Include-Phased-Updates;}
+        )
+      end
     end
 
     context 'set all the things' do
@@ -78,6 +90,7 @@ describe 'unattended_upgrades' do
           only_on_ac_power: false,
           whitelist_strict: true,
           allow_downgrade: false,
+          allow_phased_packages: false
         }
       end
 
@@ -186,6 +199,17 @@ describe 'unattended_upgrades' do
       it do
         is_expected.to contain_apt__conf('auto-upgrades').with(
           ensure: 'absent'
+        )
+      end
+
+      it do
+        is_expected.to create_file(file_phased).with(
+          owner: 'root',
+          group: 'root'
+        ).without_content(
+          %r{Update-Manager::Always-Include-Phased-Updates;}
+        ).without_content(
+          %r{APT::Get::Always-Include-Phased-Updates;}
         )
       end
     end

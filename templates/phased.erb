@@ -1,0 +1,5 @@
+<%- if @allow_phased_packages -%>
+// Allow automatically installing phased upates
+Update-Manager::Always-Include-Phased-Updates;
+APT::Get::Always-Include-Phased-Updates;
+<%- end -%>
